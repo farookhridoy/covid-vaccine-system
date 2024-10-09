@@ -12,7 +12,7 @@ class RegistrationService
      * @return array
      */
 
-    public static function GetScheduledDate(): array
+    public static function GetCenterWiseScheduledUsers(): array
     {
         // Get users scheduled for tomorrow's vaccination
         $tomorrow = (new DateTime())->modify('+1 day');

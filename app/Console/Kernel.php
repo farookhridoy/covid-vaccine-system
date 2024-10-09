@@ -2,8 +2,6 @@
 
 namespace App\Console;
 
-use App\Models\User;
-use App\Models\VaccineCenter;
 use App\Notifications\VaccineScheduleNotification;
 use App\Services\RegistrationService;
 use Illuminate\Console\Scheduling\Schedule;
@@ -19,7 +17,8 @@ class Kernel extends ConsoleKernel
 
         $schedule->call(function () {
 
-            $centers = RegistrationService::GetScheduledDate();
+            //Get center wise schedules users data
+            $centers = RegistrationService::GetCenterWiseScheduledUsers();
 
             foreach ($centers['scheduleCenters'] as $center) {
                 $count = $center->scheduledUsers->count();
@@ -38,7 +37,7 @@ class Kernel extends ConsoleKernel
                 }
             }
 
-        })->everyMinute('21:00'); // Schedule this to run every day at 9 PM
+        })->dailyAt('21:00'); // Schedule this to run every day at 9 PM
 
     }
 

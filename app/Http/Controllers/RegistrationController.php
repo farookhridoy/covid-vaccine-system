@@ -42,7 +42,8 @@ class RegistrationController extends Controller
 
             DB::commit();
 
-            return backWithSuccess('Vaccine Registration has been complete successfully!! We weill send you an notification before your vaccinate date');
+            return backWithSuccess('Vaccine Registration has been complete successfully!! We will send you an notification on your email before your vaccinate date');
+
         } catch (\Exception $e) {
             DB::rollBack();
             return backWithError($e->getMessage());
@@ -54,28 +55,34 @@ class RegistrationController extends Controller
      */
     public function vaccineStatus()
     {
-        $pageTitle = 'Registration';
+        $pageTitle = 'Vaccine Status';
 
         $status = '';
 
         if (request()->has('nid')) {
-            $nidNo = request()->get('nid');
-            $user = User::where('nid', $nidNo)->first();
+
+            $user = User::with('vaccineCenter')->where('nid', request()->get('nid'))->first();
 
             if (!$user) {
-                $status = 'User Not Registration yet. Please click this link to complete the registration <a href="' .
+                $status = 'User not registration yet. Please click this link to complete the registration <a href="' .
                     url('registration') . '">Registration</a>';
             } else {
-                $status = 'Status:: <strong>Not Scheduled</strong>';
+
                 if ($user->scheduled_date) {
                     $currentDate = date('Y-m-d');
 
-                    if ($user->scheduled_date < $currentDate) {
+                    if ($user->scheduled_date <= $currentDate) {
                         $status = 'Status:: <strong>Vaccinated</strong>';
                     } else {
-                        $status = 'Status:: <strong>Scheduled</strong>';
+                        $status .= 'Status:: <strong>Scheduled</strong><br>';
+                        $status .= 'Date:: <strong>' . date('d M Y', strtotime($user->scheduled_date)) . '</strong><br>';
+                        $status .= 'Center:: <strong>' . $user->vaccineCenter->name . '</strong><br>';
+                        $status .= 'Address:: <strong>' . $user->vaccineCenter->address ?? '' . '</strong>';
                     }
+                } else {
+                    $status = 'Status:: <strong>Not Scheduled</strong>';
                 }
+
             }
         }
 

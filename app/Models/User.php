@@ -28,13 +28,9 @@ class User extends Authenticatable
         'status',
     ];
 
-    /**
-     * @return void
-     */
-
-    public function vaccineCenter(): void
+    public function vaccineCenter()
     {
-        $this->hasOne(VaccineCenter::class, 'vaccine_center_id', 'id');
+        return $this->hasOne(VaccineCenter::class, 'id', 'vaccine_center_id');
     }
 
 }

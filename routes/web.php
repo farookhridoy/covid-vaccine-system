@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\RegistrationController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,5 +15,14 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    $pageTitle = 'Home';
+    return view('welcome', compact('pageTitle'));
 });
+
+Route::get('registration', [RegistrationController::class, 'registration'])
+    ->name('registration');
+Route::post('registration-submit', [RegistrationController::class, 'store'])
+    ->name('registration.store');
+
+Route::get('vaccine-status', [RegistrationController::class, 'vaccineStatus'])
+    ->name('vaccine.status');

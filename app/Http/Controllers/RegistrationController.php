@@ -5,9 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Requests\RegistrationRequest;
 use App\Models\User;
 use App\Models\VaccineCenter;
-use App\Notifications\VaccineScheduleNotification;
-use App\Services\RegistrationService;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class RegistrationController extends Controller
@@ -32,10 +29,6 @@ class RegistrationController extends Controller
         //Check vaccine center
         $vaccineCenter = VaccineCenter::find($request->vaccine_center_id);
 
-        if (isset($vaccineCenter)) {
-            $getScheduleDate = RegistrationService::GetScheduledDate($vaccineCenter);
-        }
-
         DB::beginTransaction();
         try {
 
@@ -44,17 +37,12 @@ class RegistrationController extends Controller
                 'nid' => $request->nid,
                 'email' => $request->email,
                 'vaccine_center_id' => $vaccineCenter->id,
-                'scheduled_date' => $getScheduleDate,
-                'status' => 'scheduled',
+                'status' => 'not_scheduled',
             ]);
-
-            //Send mail notification to the user
-
-            //$user->notify(new VaccineScheduleNotification($user));
 
             DB::commit();
 
-            return backWithSuccess('Vaccine Registration has been complete successfully!! Check your email for schedule date');
+            return backWithSuccess('Vaccine Registration has been complete successfully!! We weill send you an notification before your vaccinate date');
         } catch (\Exception $e) {
             DB::rollBack();
             return backWithError($e->getMessage());

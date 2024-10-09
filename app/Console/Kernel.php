@@ -2,6 +2,10 @@
 
 namespace App\Console;
 
+use App\Models\User;
+use App\Models\VaccineCenter;
+use App\Notifications\VaccineScheduleNotification;
+use App\Services\RegistrationService;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -12,7 +16,30 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+
+        $schedule->call(function () {
+
+            $centers = RegistrationService::GetScheduledDate();
+
+            foreach ($centers['scheduleCenters'] as $center) {
+                $count = $center->scheduledUsers->count();
+                foreach ($center->users as $user) {
+                    if ($center->capacity > $count) {
+
+                        $user->scheduled_date = $centers['date'];
+                        $user->status = 'scheduled';
+                        $user->save();
+
+                        // Send email reminder
+                        $user->notify(new VaccineScheduleNotification($user));
+
+                        $count++;
+                    }
+                }
+            }
+
+        })->everyMinute('21:00'); // Schedule this to run every day at 9 PM
+
     }
 
     /**
@@ -20,7 +47,7 @@ class Kernel extends ConsoleKernel
      */
     protected function commands(): void
     {
-        $this->load(__DIR__.'/Commands');
+        $this->load(__DIR__ . '/Commands');
 
         require base_path('routes/console.php');
     }

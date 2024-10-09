@@ -16,4 +16,14 @@ class VaccineCenter extends Model
         'capacity',
         'address',
     ];
+
+    public function users()
+    {
+        return $this->hasMany(User::class);
+    }
+
+    public function scheduledUsers()
+    {
+        return $this->hasMany(User::class)->where('status', 'scheduled');
+    }
 }

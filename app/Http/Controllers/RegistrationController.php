@@ -49,7 +49,8 @@ class RegistrationController extends Controller
             ]);
 
             //Send mail notification to the user
-            $user->notify(new VaccineScheduleNotification($user));
+
+            //$user->notify(new VaccineScheduleNotification($user));
 
             DB::commit();
 
@@ -63,9 +64,34 @@ class RegistrationController extends Controller
     /**
      * Display the specified resource.
      */
-    public function vaccineStatus(string $id)
+    public function vaccineStatus()
     {
-        //
+        $pageTitle = 'Registration';
+
+        $status = '';
+
+        if (request()->has('nid')) {
+            $nidNo = request()->get('nid');
+            $user = User::where('nid', $nidNo)->first();
+
+            if (!$user) {
+                $status = 'User Not Registration yet. Please click this link to complete the registration <a href="' .
+                    url('registration') . '">Registration</a>';
+            } else {
+                $status = 'Status:: <strong>Not Scheduled</strong>';
+                if ($user->scheduled_date) {
+                    $currentDate = date('Y-m-d');
+
+                    if ($user->scheduled_date < $currentDate) {
+                        $status = 'Status:: <strong>Vaccinated</strong>';
+                    } else {
+                        $status = 'Status:: <strong>Scheduled</strong>';
+                    }
+                }
+            }
+        }
+
+        return view('pages.search', compact('pageTitle', 'status'));
     }
 
 }
